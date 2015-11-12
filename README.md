@@ -1,1 +1,1 @@
-Shell scripts from www.linuxhub.ru
+Shell scripts for www.linuxhub.ru
