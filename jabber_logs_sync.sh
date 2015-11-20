@@ -3,7 +3,7 @@
 # Ftp user credential and etc..
 FTP_USER="login";
 FTP_PASS="password";
-FTP_HOST="ftp.server.ru";
+FTP_HOST="ftp.server.ua";
 FTP_PATH="/pub/chatlogs/";
 
 ### Local host variables
