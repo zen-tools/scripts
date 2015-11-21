@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# Screencast v 4.0
+#
+# http://linuxhub.ru/viewtopic.php?f=23&p=404
+#
+# Copyright (c) 2012-2013 by Poltavchenko Dmitriy <admin@linuxhub.ru>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3 of
+# the License, or (at your option) any later version.
+
+# Set up variables
+APP_ICON="camera-video";
+APP_NAME="Record My Window";
+APP_VERSION="4.0";
+PROC_PRIORITY=19;
+VIDEO_CAPTURE_BIN="avconv";
+SOUND_IN="-f alsa -i pulse"; # or -i hw:0 or -i pulse or -i default
+FILE="$HOME/$(date "+%F-%H-%M-%S").mkv";
+TRIES=5;
+PAUSE_AFTER_TRIES="0.3s";
+
+############################### FUNCTION  LISTS ###############################
+# Show message
+function message () {
+    notify-send -t 10000 -i $APP_ICON "$APP_NAME" "$@" &> /dev/null \
+    || echo "$@" 1>&2;
+}
+
+# Getting of selected area size or exit if we can't do it
+function getAreaSize () {
+    AREA=( $(
+            import -verbose /dev/null 2>&1 \
+            | cut -d' ' -f3,4 \
+            | sed 's/[x+]/ /g' \
+            | awk '{print $5" "$6" "$1" "$2}';
+        )
+    )
+
+    if [[ ${#AREA[@]} != 4 ]]
+    then
+        message "ERROR: Can't get area size ";
+        exit 2;
+    fi
+
+    echo ${AREA[@]};
+}
+
+# Getting of window size or exit if we can't do it
+function getWinSize () {
+    # Repeat N times if xwininfo can't grab the mouse
+    while [[ -z $PARAMS && $STEP -lt $TRIES ]]
+    do
+        STEP=$(( $STEP + 1 ));
+
+        PARAMS=$(xwininfo -frame \
+        | egrep 'Absolute|Width|Height' \
+        | awk -F: '{print $2}');
+
+        if [[ $STEP -gt 0 ]]
+        then
+            sleep $PAUSE_AFTER_TRIES;
+        fi
+    done
+
+    if [[ -z $PARAMS ]]
+    then
+        message "ERROR: Can't grab the mouse";
+        exit 2;
+    fi
+
+    echo $PARAMS;
+}
+
+# Make and return the string of parameters for region capture
+function parseVideoSize () {
+    PARAMS="$@";
+    ENCODER_OPT_TPL="XWxYH -i :0.0+XOFF,YOFF";
+    VAL=("XOFF" "YOFF" "XW" "YH");
+
+    for i in $PARAMS
+    do
+        TMP=$i;
+
+        if [[ ($NUM -ge 2) && ($(( $TMP % 2 )) != 0) ]]
+        then
+            TMP=$(( $TMP + 1 ));
+        fi
+
+        ENCODER_OPT_TPL=$(echo $ENCODER_OPT_TPL | sed "s/${VAL[$NUM]}/$TMP/g");
+        NUM=$(( $NUM + 1 ));
+    done
+
+    echo $ENCODER_OPT_TPL;
+}
+
+# Check script dependencies
+function require () {
+    for i in $@
+    do
+        if [[ -z $(which $i 2> /dev/null) ]]
+        then
+            message "ERROR: $i not found" 1>&2;
+            exit 1;
+        fi
+    done
+}
+
+# on SIGTERM
+function terminated () {
+    kill -SIGTERM $PROC_ID 2> /dev/null;
+    message "Recording terminated";
+    exit 0;
+}
+
+# on SIGINT
+function interrupted () {
+    kill -SIGTERM $PROC_ID 2> /dev/null;
+    exit 0;
+}
+
+# Show script version
+function showVersion () {
+    echo "$APP_NAME version $APP_VERSION";
+}
+
+# Show script usage
+function showHelp () {
+    echo -e "$APP_NAME usage: $@
+    -a
+        Record selected area
+
+    -m
+        Mute sound input
+
+    -i
+        Import functions from this script
+        Example: source screencast -i
+
+    -v
+        Show script version
+
+    -h
+        Show this help info";
+}
+###############################################################################
+
+################################## MAIN LOOP ##################################
+# Parsing command line arguments
+while getopts ":amivh:" opt;
+do
+    case "$opt" in
+        a)
+            IS_AREA="true";
+            ;;
+        m)
+            SOUND_IN="";
+            ;;
+        i)
+            OPTIND=$((OPTIND-1));
+            return &>/dev/null;
+            ;;
+        v)
+            showVersion;
+            exit 0;
+            ;;
+        h)
+            showHelp;
+            exit 0;
+            ;;
+        *)
+            showHelp;
+            exit 1;
+            ;;
+    esac
+done
+OPTIND=$((OPTIND-1));
+
+unset PROC_ID;
+trap terminated TERM;
+trap interrupted INT;
+
+# Check dependency
+require $VIDEO_CAPTURE_BIN notify-send xwininfo import nice egrep awk sed date;
+
+# Get and parse video size
+VIDEO_SIZE=$(test -z $IS_AREA && echo $(getWinSize) || echo $(getAreaSize));
+REGION=$(parseVideoSize $VIDEO_SIZE);
+
+# Let the record begin
+nice -n $PROC_PRIORITY $VIDEO_CAPTURE_BIN -y $SOUND_IN -f x11grab -threads 4 \
+-framerate 24 -show_region 1 -video_size $REGION -q 1 -bt 8000000 \
+-b 8500000 $FILE -v warning & PROC_ID=$!;
+
+wait;
+###############################################################################
+
+exit 0;
+

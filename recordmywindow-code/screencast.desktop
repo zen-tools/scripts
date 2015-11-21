@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Screencast
+Name[ru]=Screencast - запись видео с указанного окна
+Icon=media-record
+Type=Application
+Categories=AudioVideo;Audio;AudioVideoEditing;
+Exec=gtrayicon --activate-icon=/usr/share/icons/Tango/32x32/actions/media-record.png --deactivate=/usr/share/icons/Tango/32x32/actions/gtk-media-stop.png --activate="screencast-toggle -r" --deactivate="screencast-toggle -s" --tooltip="RecordMyWindow"
+StartupNotify=false

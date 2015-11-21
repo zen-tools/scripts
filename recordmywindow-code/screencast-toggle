@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+
+# Set up variables
+PATH="$PATH:$HOME/bin"
+PID_FILE="/tmp/screencast.lock";
+RUN_FILE="screencast";
+PID=$(pgrep -F $PID_FILE 2> /dev/null);
+
+############################## MY FUNCTION LISTS ##############################
+function stop () {
+    if [ $PID ]
+    then
+        kill -SIGTERM $PID;
+        rm "$PID_FILE";
+    else
+         message "ERROR: $APP_NAME doesn't running" 1>&2;
+         exit 1;
+    fi
+}
+
+function start () {
+    if [ $PID ]
+    then
+        message "ERROR: $APP_NAME already running" 1>&2;
+        exit 1;
+    else
+        touch "$PID_FILE" 2> /dev/null;
+        if [ $? != 0 ]
+        then
+            message "ERROR: Cannot create lock file" 1>&2;
+            exit 2;
+        fi
+        "$RUN_FILE" "$@" & PID=$!;
+        echo $PID > "$PID_FILE";
+    fi
+}
+
+function parseArgs() {
+    ARGS=$@;
+    while getopts ":rsvamih:" opt $ARGS;
+    do
+        case "$opt" in
+            r)
+                ARGS=(${ARGS[@]#-r});
+                start $ARGS;
+                exit 0;
+                ;;
+            s)
+                ARGS=(${ARGS[@]#-s});
+                stop $ARGS;
+                exit 0;
+                ;;
+            v)
+                showVersion;
+                exit 0;
+                ;;
+            a|m|i) # Ignore main script options
+                ;;
+            h)
+                showHelp "\n    -r\n        Run\n" \
+                         "\n    -s\n        Stop\n";
+                exit 0;
+                ;;
+            *)
+                showHelp "\n    -r\n        Run\n" \
+                         "\n    -s\n        Stop\n";
+                exit 1;
+                ;;
+        esac
+    done
+    OPTIND=$((OPTIND-1));
+}
+###############################################################################
+
+################################## MAIN LOOP ##################################
+# Check main script exists and read permission is granted
+PATH_TO_RUN_FILE=`which $RUN_FILE 2>/dev/null`;
+if [ ! -r $PATH_TO_RUN_FILE ]
+then
+    echo "ERROR: Cannot read a file $RUN_FILE" 1>&2;
+    exit 2;
+fi
+
+# Include functions and some variables from RUN_FILE
+source "$RUN_FILE" -i;
+
+# Parsing command line arguments
+parseArgs "$@";
+
+# If script run without parameters
+# And we have PID from lock file
+if [ $PID ]
+then
+    stop "$@";
+else
+    start "$@";
+fi
+###############################################################################
+
+exit 0;
+

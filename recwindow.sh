@@ -3,7 +3,7 @@
 #
 # http://linuxhub.ru/viewtopic.php?f=23&p=404
 #
-# Copyright (c) 2012-2013 by Poltavchenko Dmitriy <zen@root.ua>
+# Copyright (c) 2012-2013 by Poltavchenko Dmitriy <admin@linuxhub.ru>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
