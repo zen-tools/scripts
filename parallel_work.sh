@@ -9,16 +9,16 @@ DATA=(
     "13 OpenNews: Зашифрование swap в ядре OpenBSD"
 );
 
+let MAX_PROCS=$(nproc)+1
+
 for ITEM in "${DATA[@]}"
 do
-    CPU_CORES=$(grep -m1 'cpu cores' /proc/cpuinfo | sed 's/.*: \([0-9]*\)/\1+1/g' | bc);
-
     # Количество фоновых процессов
     JOB_PIDS=( $(jobs -p) );
 
     # Ожидаем завершение фоновой задачи,
     # если фоновых задач больше чем количество ядер + 1
-    test "${#JOB_PIDS[@]}" -ge "$CPU_CORES" && wait;
+    test "${#JOB_PIDS[@]}" -ge "$MAX_PROCS" && wait;
 
     NEWS_ID="${ITEM/ */}";
     LOCAL_NEWS_NAME="${ITEM#* }";
