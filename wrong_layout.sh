@@ -15,11 +15,11 @@ which wc &> /dev/null \
     exit 1;
 }
 
-PREV_TEXT="$(cat /tmp/last_word.translit 2> /dev/null)";
+PREV_TEXT="$(cat /tmp/wrong_layout.txt 2> /dev/null)";
 TEXT="$(xclip -o)";
 test -n "$TEXT" || exit 0;
 test "$PREV_TEXT" == "$TEXT" && exit 0;
-echo "$TEXT" > /tmp/last_word.translit;
+echo "$TEXT" > /tmp/wrong_layout.txt;
 
 if test "$(echo -n "$TEXT" | sed 's/[^a-zA-Z]//g' | wc -c)" -gt "$(echo -n "$TEXT" | sed 's/[a-zA-Z]//g' | wc -c)";
 then
