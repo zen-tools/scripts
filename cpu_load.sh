@@ -2,7 +2,7 @@
 ############################################################
 # Linux CPU Usage
 #
-# Fork: Poltavchenko Dmitriy (http://linuxhub.ru)
+# Fork: Poltavchenko Dmitriy (https://github.com/zen-tools)
 # Author: Moises P. Sena (http://moisespsena.com)
 # Original Author: Paul Colby (http://colby.id.au)
 #

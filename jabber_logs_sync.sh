@@ -8,7 +8,7 @@ FTP_PATH="/pub/chatlogs/";
 
 ### Local host variables
 export TZ="Europe/Kiev";
-CHATLOGS_DIR="/home/jabber-bot/chatlogs/linuxhub@conference.xmpp.ru";
+CHATLOGS_DIR="/home/jabber-bot/chatlogs/room@conference.jabber.ua";
 SAVE_FILE="/home/jabber-bot/$(basename $0 .sh).save";
 TMP_FILE="/tmp/$(date +"%s")_$(basename $0 .sh).tmp";
 SCRIPT_DEPS=(

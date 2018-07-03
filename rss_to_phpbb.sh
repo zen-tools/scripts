@@ -7,11 +7,11 @@ PASS="Secret"
 # POST data for login
 POST_DATA="username=$LOGIN&password=$PASS&login=%D0%92%D1%85%D0%BE%D0%B4"
 # url to login page
-LOGIN_URL="http://www.linuxhub.ru/forum/ucp.php?mode=login"
+LOGIN_URL="http://example.com/forum/ucp.php?mode=login"
 # url to page to post messages
-TARGET_URL="http://www.linuxhub.ru/forum/viewforum.php?f=5"
+TARGET_URL="http://example.com/forum/viewforum.php?f=5"
 # url to logout page
-LOGOUT_URL="http://www.linuxhub.ru/forum/ucp.php?mode=logout"
+LOGOUT_URL="http://example.com/forum/ucp.php?mode=logout"
 # path to temporaly cookies file
 COOKIES_PATH="/tmp/cookies.txt"
 

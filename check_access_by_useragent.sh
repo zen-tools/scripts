@@ -8,7 +8,7 @@ fi
 
 cat "$1" | while read line
 do
-    res=`wget -q linuxhub.ru -U "$line" -S -O - 2>&1 | grep HTTP`
+    res=`wget -q example.com -U "$line" -S -O - 2>&1 | grep HTTP`
     echo $line - $res
 done
 exit 0
