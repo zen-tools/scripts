@@ -1,1 +1,1 @@
-Shell scripts for www.linuxhub.ru
+Bourne shell scripts
